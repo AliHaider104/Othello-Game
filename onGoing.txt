@@ -1,0 +1,951 @@
+#include<iostream>
+#include<conio.h>
+#include"Header.h"
+#include<fstream>
+using namespace std;
+
+struct Point
+{
+	int x;
+	int y;
+	Point* next;
+};
+class LL_ADT
+{
+private:
+	Point* root;
+
+public:
+	LL_ADT()
+	{
+		root = nullptr;
+	}
+
+	void Insert(int x,int y)
+	{
+		Point* temp = new Point();
+		temp->x = x;
+		temp->y = y;
+		temp->next = nullptr;
+
+		if (root == nullptr)
+		{
+			root = temp;
+		}
+		else
+		{
+			Point* curr;
+			curr = root;
+			while (curr->next != nullptr)
+			{
+				curr = curr->next;
+			}
+			curr->next = temp;
+		}
+	}
+
+	void Print()
+	{
+		Point* curr=root;
+		cout << "SELECT FROM THESE POSSIBLE MOVES:\n";
+		while (curr)
+		{
+			cout <<"X: "<< curr->x << " Y: " << curr->y <<"\n";
+			curr = curr->next;
+		}
+
+	}
+
+	int Size()
+	{
+		int count = 0;
+
+		Point* curr=root;
+		while (curr)
+		{
+			curr = curr->next;
+			count++;
+		}
+
+		return count;
+	}
+
+	Point* RETURN_MOVE(int moveNumber)
+	{
+		int count = 1;
+
+		if (root!=nullptr && moveNumber == 1)
+			return root;
+		else {
+			Point* curr = root;
+			
+			while (curr->next!=nullptr && count != moveNumber)
+			{
+				curr = curr->next;
+				count++;
+			}
+
+			return curr;
+		}
+	}
+};
+
+void READ_MY_BOARD(char board[][8],const char file[])
+{
+	ifstream fin;
+	fin.open(file);
+
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			fin >> board[i][j];
+		}
+	}
+}
+void PRINT_MY_BOARD(char board[][8])
+{
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			cout << board[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+void POSSIBLE_MOVE(LL_ADT& moves, char board[][8],char key)
+{
+	// GENRATE MOVE FOR WHITE
+	if (key == 'w') // white player is playing
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				if (board[i][j] == 'w') // we got the first white now we will check all the possible moves around it
+				{
+					int x = i;
+					int y = j;
+
+					if (y>=1 && board[x][y - 1] == 'b') // if previous value is black
+					{
+						while ( y>=1 && board[x][y - 1] == 'b')
+						{
+							y--;
+						}
+
+						if (y >= 1 && board[x][y-1] == '*') // loop breaks at blank move is possible
+						{
+							moves.Insert(x, y-1);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (y < 7 && board[x][y + 1] == 'b') // if next value is black
+					{
+						while ( y<7 && board[x][y + 1] == 'b')
+						{
+							y++;
+						}
+
+						if (y < 7 && board[x][y + 1] == '*') // loop breaks at blank move is possible
+						{
+							moves.Insert(x, y + 1);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (x >= 1 && board[x - 1][y] == 'b') // black is present on upward
+					{
+						while (x >= 1 && board[x - 1][y] == 'b')
+						{
+							x--;
+						}
+
+						if (x >= 1 && board[x - 1][y] == '*') // blank free slot
+						{
+							moves.Insert(x - 1, y);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (x < 7 && board[x + 1][y] == 'b') // black is present downward
+					{
+						while (x < 7 && board[x + 1][y] == 'b')
+						{
+							x++;
+						}
+
+						if (x < 7 && board[x + 1][y] == '*') // blank move is possible
+						{
+							moves.Insert(x + 1, y);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (x >= 1 && y >= 1 && board[x - 1][y - 1] == 'b') // diagonally up left
+					{
+						while (x >= 1 && y >= 1 && board[x - 1][y - 1] == 'b')
+						{
+							x--;
+							y--;
+						}
+
+						if (x >= 1 && y >= 1 && board[x - 1][y - 1] == '*') // blank move is possible
+						{
+							moves.Insert(x - 1, y - 1);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (x < 7 && y < 7 && board[x + 1][y + 1] == 'b') // diagonally downward right
+					{
+						while (x < 7 && y < 7 && board[x + 1][y + 1] == 'b')
+						{
+							x++;
+							y++;
+						}
+
+						if (x < 7 && y < 7 && board[x + 1][y + 1] == '*')
+						{
+							moves.Insert(x + 1, y + 1);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (x >= 1 && y < 7 && board[x - 1][y + 1] == 'b') // diagonally upward right
+					{
+						while (x >= 1 && y < 7 && board[x - 1][y + 1] == 'b')
+						{
+							x--;
+							y++;
+						}
+
+						if (x >= 1 && y < 7 && board[x - 1][y + 1] == '*')
+						{
+							moves.Insert(x - 1, y + 1);
+						}
+					}
+
+					// reset the values
+
+					if (x >= 1 && y >= 1 && board[x - 1][y - 1] == 'b') // diagonally downward left
+					{
+						while (x >= 1 && y >= 1 && board[x - 1][y - 1] == 'b')
+						{
+							x--;
+							y--;
+						}
+
+						if (x >= 1 && y >= 1 && board[x - 1][y - 1] == '*')
+						{
+							moves.Insert(x - 1, y - 1);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// GENRATE MOVE FOR BLACK
+	if (key == 'b') // black player is playing
+	{
+
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				if (board[i][j] == 'b') // we got the first blacl now we will check all the possible moves around it
+				{
+					int x = i;
+					int y = j;
+					if (y >= 1 && board[x][y - 1] == 'w') // if previous value is white
+					{
+						while (y >= 1 && board[x][y - 1] == 'w')
+						{
+							y--;
+						}
+
+						if (y >= 1 && board[x][y - 1] == '*') // loop breaks at blank move is possible
+						{
+							moves.Insert(x, y - 1);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (y < 7 && board[x][y + 1] == 'w') // if next value is white
+					{
+						while (y < 7 && board[x][y + 1] == 'w')
+						{
+							y++;
+						}
+
+						if (y < 7 && board[x][y + 1] == '*') // loop breaks at blank move is possible
+						{
+							moves.Insert(x, y + 1);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (x >= 1 && board[x - 1][y] == 'w') // white is present on upward
+					{
+						while (x >= 1 && board[x - 1][y] == 'w')
+						{
+							x--;
+						}
+
+						if (x >= 1 && board[x - 1][y] == '*') // blank free slot
+						{
+							moves.Insert(x - 1, y);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (x < 7 && board[x + 1][y] == 'w') // whhite is present downward
+					{
+						while (x < 7 && board[x + 1][y] == 'w')
+						{
+							x++;
+						}
+
+						if (x < 7 && board[x + 1][y] == '*') // blank move is possible
+						{
+							moves.Insert(x + 1, y);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (x >= 1 && y >= 1 && board[x - 1][y - 1] == 'w') // diagonally up left
+					{
+						while (x >= 1 && y >= 1 && board[x - 1][y - 1] == 'w')
+						{
+							x--;
+							y--;
+						}
+
+						if (x >= 1 && y >= 1 && board[x - 1][y - 1] == '*') // blank move is possible
+						{
+							moves.Insert(x - 1, y - 1);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (x < 7 && y < 7 && board[x + 1][y + 1] == 'w') // diagonally downward right
+					{
+						while (x < 7 && y < 7 && board[x + 1][y + 1] == 'w')
+						{
+							x++;
+							y++;
+						}
+
+						if (x < 7 && y < 7 && board[x + 1][y + 1] == '*')
+						{
+							moves.Insert(x + 1, y + 1);
+						}
+					}
+
+					// reset the values
+					x = i;
+					y = j;
+
+					if (x >= 1 && y < 7 && board[x - 1][y + 1] == 'w') // diagonally upward right
+					{
+						while (x >= 1 && y < 7 && board[x - 1][y + 1] == 'w')
+						{
+							x--;
+							y++;
+						}
+
+						if (x >= 1 && y < 7 && board[x - 1][y + 1] == '*')
+						{
+							moves.Insert(x - 1, y + 1);
+						}
+					}
+
+					// reset the values
+
+					if (x >= 1 && y >= 1 && board[x - 1][y - 1] == 'w') // diagonally downward left
+					{
+						while (x >= 1 && y >= 1 && board[x - 1][y - 1] == 'w')
+						{
+							x--;
+							y--;
+						}
+
+						if (x >= 1 && y >= 1 && board[x - 1][y - 1] == '*')
+						{
+							moves.Insert(x - 1, y - 1);
+						}
+					}
+				}
+			}
+		}
+
+	}
+}
+void PLACE_ON_XY(char board[][8],int x,int y,char key)
+{
+	// CHANGE ALL FOR W
+	if (key == 'w')
+	{
+		board[x][y] = 'w'; // place white
+
+		int x1=x;
+		int y1=y;
+
+		// check upward
+		if (x1 >= 1 && board[x1 - 1][y1] == 'b') {
+			while (x1 >= 1 && board[x1 - 1][y1] == 'b')
+			{
+				x1--;
+			}
+
+			if (board[x1 - 1][y1] == 'w') // if last is w then replace all
+			{
+				for (int i = x; i >= x1-1; i--)
+					board[i][y1] = 'w';
+			}
+		}
+
+		// reset
+		x1 = x;
+		y1 = y;
+
+		// check downward
+		if (x1<7 && board[x1+1][y1] == 'b') {
+			while (x1<7 && board[x1+1][y1] == 'b')
+			{
+				x1++;
+			}
+
+			if (board[x1 + 1][y1] == 'w') // if last is w then replace all
+			{
+				for (int i = x; i < x1+1; i++)
+					board[i][y1] = 'w';
+			}
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+
+		// check left
+		if (y1>=1 && board[x1][y1-1] == 'b') {
+			while (y1>=1 && board[x1][y1-1] == 'b')
+			{
+				y1--;
+			}
+
+			if (board[x1][y1-1] == 'w') // if last is w then replace all
+			{
+				for (int i = y; i>=y1; i--)
+					board[x1][i] = 'w';
+			}
+		}
+
+	   // reset values
+		x1 = x;
+		y1 = y;
+
+		// check right
+		if (y1 < 7 && board[x1][y1+1] == 'b') {
+			while (y1 < 7 && board[x1][y1+1] == 'b')
+			{
+				y1++;
+			}
+
+			if (board[x1][y1+1] == 'w') // if last is w then replace all
+			{
+				for (int i = y; i < y1+1; i++)
+					board[x1][i] = 'w';
+			}
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+
+		// check left upward diagonally
+		if (x1 >= 1 && y1 >= 1 && board[x1 - 1][y1 - 1] == 'b')
+		{
+			while (x1 >= 1 && y1 >= 1 && board[x1 - 1][y1 - 1] == 'b')
+			{
+				x1--;
+				y1--;
+			}
+
+			if (board[x1 - 1][y1 - 1] == 'w')
+			{
+				while (x1 - 1 < x && y1 - 1 < y)
+				{
+					board[x1 - 1][y1 - 1] = 'w';
+					x1++;
+					y1++;
+				}
+			}
+
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+
+		//check right upward diagonally
+		if (x1 >= 1 && y1 < 7 && board[x1 - 1][y1 + 1] == 'b')
+		{
+			while (x1 >= 1 && y1 < 7 && board[x1 - 1][y1 + 1] == 'b')
+			{
+				x1--;
+				y1++;
+			}
+
+			if (board[x1 - 1][y1 + 1] == 'w')
+			{
+				while (x1-1 < x && y1+1 > y)
+				{
+					board[x1 - 1][y1 + 1] = 'w';
+					x1++;
+					y1--;
+				}
+			}
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+
+		//check left downward diagonally
+		if (x1 < 7 && y1 >= 1 && board[x1 + 1][y1 - 1] == 'b')
+		{
+			while (x1 < 7 && y1 >= 1 && board[x1 + 1][y1 - 1] == 'b')
+			{
+				x1++;
+				y1--;
+			}
+
+			if (board[x1 + 1][y1 - 1] == 'w')
+			{
+				while (x1 + 1 > x && y1 - 1 < y)
+				{
+					board[x1][y1] = 'w';
+					x1--;
+					y1++;
+				}
+			}
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+	    
+		// check right downward diagonally
+		if (y1 < 7 && x1 < 7 && board[x1 + 1][y1 + 1] == 'b')
+		{
+			while (y1 < 7 && x1 < 7 && board[x1 + 1][y1 + 1] == 'b')
+			{
+				y1++;
+				x1++;
+			}
+
+			if (board[x1 + 1][y1 + 1] == 'w')
+			{
+				while (x1+1 > x && y1+1 > y)
+				{
+					board[x1 + 1][y1 + 1] = 'w';
+					x1--;
+					y1--;
+				}
+			}
+		}
+
+
+		
+
+	}
+	// CHANGE ALL FOR B
+	if (key == 'b')
+	{
+		board[x][y] = 'b'; // place white
+
+		int x1 = x;
+		int y1 = y;
+
+		// check upward
+		if (x1 >= 1 && board[x1 - 1][y1] == 'w') {
+			while (x1 >= 1 && board[x1 - 1][y1] == 'w')
+			{
+				x1--;
+			}
+
+			if (board[x1 - 1][y1] == 'b') // if last is w then replace all
+			{
+				for (int i = x; i >= x1 - 1; i--)
+					board[i][y1] = 'b';
+			}
+		}
+
+		// reset
+		x1 = x;
+		y1 = y;
+
+		// check downward
+		if (x1 < 7 && board[x1 + 1][y1] == 'w') {
+			while (x1 < 7 && board[x1 + 1][y1] == 'w')
+			{
+				x1++;
+			}
+
+			if (board[x1 + 1][y1] == 'b') // if last is w then replace all
+			{
+				for (int i = x; i < x1 + 1; i++)
+					board[i][y1] = 'b';
+			}
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+
+		// check left
+		if (y1 >= 1 && board[x1][y1 - 1] == 'w') {
+			while (y1 >= 1 && board[x1][y1 - 1] == 'w')
+			{
+				y1--;
+			}
+
+			if (board[x1][y1 - 1] == 'b') // if last is w then replace all
+			{
+				for (int i = y; i >= y1; i--)
+					board[x1][i] = 'b';
+			}
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+
+		// check right
+		if (y1 < 7 && board[x1][y1 + 1] == 'w') {
+			while (y1 < 7 && board[x1][y1 + 1] == 'w')
+			{
+				y1++;
+			}
+
+			if (board[x1][y1 + 1] == 'b') // if last is w then replace all
+			{
+				for (int i = y; i < y1 + 1; i++)
+					board[x1][i] = 'b';
+			}
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+
+		// check left upward diagonally
+		if (x1 >= 1 && y1 >= 1 && board[x1 - 1][y1 - 1] == 'w')
+		{
+			while (x1 >= 1 && y1 >= 1 && board[x1 - 1][y1 - 1] == 'w')
+			{
+				x1--;
+				y1--;
+			}
+
+			if (board[x1 - 1][y1 - 1] == 'b')
+			{
+				while (x1 - 1 < x && y1 - 1 < y)
+				{
+					board[x1 - 1][y1 - 1] = 'b';
+					x1++;
+					y1++;
+				}
+			}
+
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+
+		//check right upward diagonally
+		if (x1 >= 1 && y1 < 7 && board[x1 - 1][y1 + 1] == 'w')
+		{
+			while (x1 >= 1 && y1 < 7 && board[x1 - 1][y1 + 1] == 'w')
+			{
+				x1--;
+				y1++;
+			}
+
+			if (board[x1 - 1][y1 + 1] == 'b')
+			{
+				while (x1 - 1 < x && y1 + 1 > y)
+				{
+					board[x1 - 1][y1 + 1] = 'b';
+					x1++;
+					y1--;
+				}
+			}
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+
+		//check left downward diagonally
+		if (x1 < 7 && y1 >= 1 && board[x1 + 1][y1 - 1] == 'w')
+		{
+			while (x1 < 7 && y1 >= 1 && board[x1 + 1][y1 - 1] == 'w')
+			{
+				x1++;
+				y1--;
+			}
+
+			if (board[x1 + 1][y1 - 1] == 'b')
+			{
+				while (x1 + 1 > x && y1 - 1 < y)
+				{
+					board[x1][y1] = 'b';
+					x1--;
+					y1++;
+				}
+			}
+		}
+
+		// reset values
+		x1 = x;
+		y1 = y;
+
+		// check right downward diagonally
+		if (y1 < 7 && x1 < 7 && board[x1 + 1][y1 + 1] == 'w')
+		{
+			while (y1 < 7 && x1 < 7 && board[x1 + 1][y1 + 1] == 'w')
+			{
+				y1++;
+				x1++;
+			}
+
+			if (board[x1 + 1][y1 + 1] == 'b')
+			{
+				while (x1 + 1 > x && y1 + 1 > y)
+				{
+					board[x1 + 1][y1 + 1] = 'b';
+					x1--;
+					y1--;
+				}
+			}
+		}
+
+	}
+}
+void COPY_MY_BOARD(char board[][8], char copy[][8])
+{
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			copy[i][j] = board[i][j];
+		}
+	}
+}
+int EVALUATION_FUNCTION(char board[][8], char key)
+{
+	int whiteCount = 0;
+	int BlackCount = 0;
+
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			if (board[i][j] == 'b')
+				BlackCount++;
+
+			if (board[i][j] == 'w')
+				whiteCount++;
+		}
+	}
+
+	if(key=='b')
+	return(BlackCount - whiteCount);
+
+	return(whiteCount - BlackCount);
+}
+Point* minMax(char board[][8], char key)
+{
+	if (key == 'b')
+	{
+		LL_ADT moves;
+		POSSIBLE_MOVE(moves, board, key);
+		char copy[8][8];
+		int* EVALUATION_VALUES = new int[moves.Size()];
+
+		int moveNumber = 1;
+		while (moveNumber <= moves.Size())
+		{
+			Point* temp = moves.RETURN_MOVE(moveNumber);
+			COPY_MY_BOARD(board, copy);
+			PLACE_ON_XY(copy, temp->x, temp->y, 'b');
+			int value=EVALUATION_FUNCTION(copy,'b');
+			EVALUATION_VALUES[moveNumber - 1] = value;
+			moveNumber++;
+
+		}
+
+		int maxIndex = -1;
+		int maxValue = -999;
+
+		for (int i = 0; i < moves.Size(); i++)
+		{
+			if (maxValue < EVALUATION_VALUES[i]) {
+				maxValue = EVALUATION_VALUES[i];
+				maxIndex = i;
+			}
+		}
+
+		return moves.RETURN_MOVE(maxIndex + 1);
+	}
+	return nullptr;
+}
+
+
+int minMaxRecursion(char board[][8],char key,int depth,Point* p)
+{
+	// BASE CASE
+	if (depth == 0)
+	{
+		return EVALUATION_FUNCTION(board, key);
+	}
+	else
+	{
+		if (key == 'b')
+		{
+			// max function
+
+			LL_ADT moves_of_b;
+			POSSIBLE_MOVE(moves_of_b, board, 'b');
+			int moveNumber = 1;
+			Point* max;
+			int maxValue = -999;
+
+			while (moveNumber <= moves_of_b.Size())
+			{
+				char temp[8][8];
+				COPY_MY_BOARD(board, temp);
+				Point* move = moves_of_b.RETURN_MOVE(moveNumber);
+				//GENRATE A NEW STATE
+				PLACE_ON_XY(temp, move->x, move->y, 'b');
+				int value = minMaxRecursion(temp, 'w', depth - 1, p); // call for min
+
+				if (maxValue < value)
+				{
+					// pointer start poiting to the move that is good
+					maxValue = value;
+					p->x = move->x;
+					p->y = move->y;
+				}
+
+				moveNumber++;
+
+			}
+
+
+
+		}
+
+		if (key == 'w')
+		{
+			// min function
+		}
+	}
+}
+
+
+
+int main()
+{
+	char board[8][8];
+	READ_MY_BOARD(board, "board.txt");
+
+
+	char player = 'w';
+	while (1) {
+
+		if (player == 'w')
+		{ 
+
+			PRINT_MY_BOARD(board);
+			LL_ADT moves;
+			POSSIBLE_MOVE(moves, board, player);
+			moves.Print();
+			cout << "\nENTER YOUR CHOICE:\n";
+			int x;
+			int y;
+			cin >> x;
+			cin >> y;
+			PLACE_ON_XY(board, x, y, player);
+			player = 'b';
+
+
+		}
+
+		if (player == 'b')
+		{
+			PRINT_MY_BOARD(board);
+			LL_ADT moves;
+			POSSIBLE_MOVE(moves, board, player);
+			moves.Print();
+			cout << "\nENTER YOUR CHOICE:\n";
+			int x;
+			int y;
+			Point* temp=minMax(board, 'b');
+			if (temp != NULL) {
+				x = temp->x;
+				y = temp->y;
+				PLACE_ON_XY(board, x, y, player);
+			}
+
+			player = 'w';
+		}
+
+	}
+
+
+
+	
+
+	
+	_getch();
+}
